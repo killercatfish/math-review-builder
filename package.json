@@ -1,0 +1,14 @@
+{
+  "name": "math-review-builder",
+  "private": true,
+  "description": "Turn photos of a graded math test into step-by-step review walkthroughs, practice, and a printable sheet.",
+  "license": "CC-BY-NC-4.0",
+  "scripts": {
+    "build": "python3 scripts/build.py",
+    "test": "python3 tests/run_tests.py"
+  },
+  "devDependencies": {
+    "katex": "0.16.9",
+    "mathjs": "12.4.2"
+  }
+}

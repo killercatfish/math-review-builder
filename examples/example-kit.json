@@ -1,0 +1,542 @@
+{
+ "schema": "math-review-kit/0.1",
+ "title": "Example: Exponents Quiz",
+ "course": "Algebra 1 · fictional student",
+ "score": "4.5 / 15",
+ "student_summary": "This is a made-up example. The student handles the exponent rules well and solved #5 cleanly. The points went in the arithmetic after the exponents (#1, #2, #3) and in subtracting a whole exponent (#4). The practice leans on those two habits.",
+ "test_questions": [
+  {
+   "n": 1,
+   "status": "wrong",
+   "points": "0/3",
+   "section": "Simplify to one value, no exponents",
+   "prompt": "Simplify to one value.",
+   "problem": "(-3)^{3}\\cdot(-6)^{-2}",
+   "answer": "-\\dfrac{3}{4}",
+   "student_answer": "-972",
+   "what_broke": "Treated (−6)⁻² as 36 instead of 1/36, so the work multiplied −27 by 36.",
+   "check": {
+    "type": "expr",
+    "given_expr": "(-3)^3*(-6)^(-2)",
+    "expected": "-3/4"
+   },
+   "steps": [
+    {
+     "label": "Step 1 · odd power",
+     "math": "\\hl{(-3)^{3}}\\cdot(-6)^{-2}",
+     "caption": "An odd power of a negative stays negative: (−3)³ = −27."
+    },
+    {
+     "label": "Step 2 · negative exponent",
+     "math": "-27\\cdot\\warn{(-6)^{-2}}",
+     "caption": "Flip it, then square."
+    },
+    {
+     "label": "Step 2 · negative exponent",
+     "math": "-27\\cdot\\dfrac{1}{36}",
+     "caption": "(−6)² = +36. Careful: it's 1/36, not 36."
+    },
+    {
+     "label": "Answer",
+     "math": "-\\dfrac{27}{36}=-\\dfrac{3}{4}",
+     "caption": "Reduce by 9."
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "status": "wrong",
+   "points": "0/3",
+   "section": "Simplify to one value, no exponents",
+   "prompt": "Simplify to one value.",
+   "problem": "\\left(\\dfrac{3}{2^{-2}}\\right)^{-2}",
+   "answer": "\\dfrac{1}{144}",
+   "student_answer": "\\dfrac{1}{25}",
+   "what_broke": "Got to 3⁻² / 2⁴ correctly, then added 9 + 16 instead of multiplying. 1/(9 · 16) is 1/144.",
+   "check": {
+    "type": "expr",
+    "given_expr": "(3/2^(-2))^(-2)",
+    "expected": "1/144"
+   },
+   "steps": [
+    {
+     "label": "Step 1 · inside first",
+     "math": "\\left(\\dfrac{3}{\\warn{2^{-2}}}\\right)^{-2}",
+     "caption": "Clean up inside first: 2⁻² = 1/4."
+    },
+    {
+     "label": "Step 2 · divide by a fraction",
+     "math": "\\left(\\hl{3\\cdot 4}\\right)^{-2}",
+     "caption": "Dividing by 1/4 is multiplying by 4."
+    },
+    {
+     "label": "Step 3 · negative exponent",
+     "math": "\\warn{12^{-2}}=\\dfrac{1}{12^{2}}",
+     "caption": "Flip it, then square."
+    },
+    {
+     "label": "Answer",
+     "math": "\\dfrac{1}{144}",
+     "caption": "Trap: 12² = 144. Multiply, don't add."
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "status": "partial",
+   "points": "1.5/3",
+   "section": "Simplify to one value, no exponents",
+   "prompt": "Simplify to one value.",
+   "problem": "\\left(\\dfrac{4}{3}\\right)^{-2}-8^{-1}",
+   "answer": "\\dfrac{7}{16}",
+   "student_answer": "\\dfrac{9}{128}",
+   "what_broke": "Both flips were right (9/16 and 1/8). Then the two were multiplied instead of subtracted; 9/16 − 1/8 needs a common denominator.",
+   "check": {
+    "type": "expr",
+    "given_expr": "(4/3)^(-2)-8^(-1)",
+    "expected": "7/16"
+   },
+   "steps": [
+    {
+     "label": "Step 1 · flip",
+     "math": "\\warn{\\left(\\tfrac{4}{3}\\right)^{-2}}-8^{-1}",
+     "caption": "Flip, then square: (3/4)² = 9/16."
+    },
+    {
+     "label": "Step 2 · flip",
+     "math": "\\dfrac{9}{16}-\\warn{8^{-1}}",
+     "caption": "8⁻¹ = 1/8."
+    },
+    {
+     "label": "Step 3 · keep the operation",
+     "math": "\\dfrac{9}{16}\\,\\warn{-}\\,\\dfrac{1}{8}",
+     "caption": "It's still a minus. Don't multiply."
+    },
+    {
+     "label": "Step 4 · common denominator",
+     "math": "\\dfrac{9}{16}-\\dfrac{2}{16}",
+     "caption": "1/8 = 2/16."
+    },
+    {
+     "label": "Answer",
+     "math": "\\dfrac{7}{16}",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "n": 4,
+   "status": "wrong",
+   "points": "0/3",
+   "section": "Solve for k",
+   "prompt": "Solve for k.",
+   "problem": "\\dfrac{x^{-2k+3}}{x^{k+9}}=x^{12}",
+   "answer": "k=-6",
+   "student_answer": "k=0",
+   "what_broke": "Wrote −2k + 3 − k + 9 = 12. The minus in front of (k + 9) has to hit both terms: −k − 9.",
+   "check": {
+    "type": "solve",
+    "lhs": "x^(-2k+3)/x^(k+9)",
+    "rhs": "x^12",
+    "var": "k",
+    "expected": "-6"
+   },
+   "steps": [
+    {
+     "label": "Step 1 · divide means subtract",
+     "math": "x^{(-2k+3)\\,\\warn{-\\,(k+9)}}=x^{12}",
+     "caption": "Subtract the whole bottom exponent. Keep the parentheses."
+    },
+    {
+     "label": "Step 2 · distribute the minus",
+     "math": "-2k+3\\,\\warn{-k-9}=12",
+     "caption": "The minus hits both: −k and −9."
+    },
+    {
+     "label": "Step 3 · combine",
+     "math": "\\hl{-2k-k}+\\hl{3-9}=12",
+     "caption": "−3k and −6."
+    },
+    {
+     "label": "Step 4 · solve",
+     "math": "-3k-6=12\\quad\\Rightarrow\\quad -3k=18",
+     "caption": ""
+    },
+    {
+     "label": "Step 4 · solve",
+     "math": "k=-6",
+     "caption": "Divide by −3."
+    },
+    {
+     "label": "Check",
+     "math": "\\dfrac{x^{15}}{x^{3}}=x^{12}\\ \\checkmark",
+     "caption": "−2(−6) + 3 = 15 and −6 + 9 = 3."
+    }
+   ]
+  },
+  {
+   "n": 5,
+   "status": "correct",
+   "points": "3/3",
+   "section": "Solve for k",
+   "prompt": "Solve for k.",
+   "problem": "4^{k+1}\\cdot 2^{k-4}=16^{4}",
+   "answer": "k=6",
+   "student_answer": "k=6",
+   "what_broke": "",
+   "check": {
+    "type": "solve",
+    "lhs": "4^(k+1)*2^(k-4)",
+    "rhs": "16^4",
+    "var": "k",
+    "expected": "6"
+   },
+   "steps": [
+    {
+     "label": "Step 1 · same base",
+     "math": "\\hl{4}^{k+1}\\cdot 2^{k-4}=\\hl{16}^{4}",
+     "caption": "Write everything as a power of 2: 4 = 2², 16 = 2⁴."
+    },
+    {
+     "label": "Step 1 · same base",
+     "math": "(2^{2})^{k+1}\\cdot 2^{k-4}=(2^{4})^{4}",
+     "caption": ""
+    },
+    {
+     "label": "Step 2 · power to a power",
+     "math": "2^{\\hl{2k+2}}\\cdot 2^{k-4}=2^{\\hl{16}}",
+     "caption": "2(k + 1) = 2k + 2 and 4 · 4 = 16. Multiply, don't add."
+    },
+    {
+     "label": "Step 3 · same base, add",
+     "math": "2^{3k-2}=2^{16}",
+     "caption": "(2k + 2) + (k − 4) = 3k − 2."
+    },
+    {
+     "label": "Step 4 · match exponents",
+     "math": "3k-2=16\\quad\\Rightarrow\\quad k=6",
+     "caption": "3k = 18."
+    },
+    {
+     "label": "Check",
+     "math": "4^{7}\\cdot 2^{2}=2^{14}\\cdot 2^{2}=2^{16}=16^{4}\\ \\checkmark",
+     "caption": ""
+    }
+   ]
+  }
+ ],
+ "background": [
+  {
+   "topic": "Fraction moves after the flip",
+   "explanation": "A lot of exponent points are lost after the exponent work is done, in the plain fraction arithmetic. Multiplying fractions goes straight across. Adding or subtracting needs a common denominator. Then always reduce.",
+   "steps": [
+    {
+     "label": "Multiply: straight across",
+     "math": "\\dfrac{1}{25}\\cdot\\dfrac{1}{16}=\\dfrac{1}{\\hl{25\\cdot 16}}=\\dfrac{1}{400}",
+     "caption": "Multiply the bottoms. No common denominator needed. 25 + 16 = 41 would be adding."
+    },
+    {
+     "label": "Subtract: common denominator",
+     "math": "\\dfrac{4}{9}\\,\\warn{-}\\,\\dfrac{1}{6}",
+     "caption": "A minus sign means subtract. You need a common denominator first."
+    },
+    {
+     "label": "Subtract: common denominator",
+     "math": "\\dfrac{8}{18}-\\dfrac{3}{18}=\\dfrac{5}{18}",
+     "caption": "LCD 18. Subtract the tops, keep the bottom."
+    },
+    {
+     "label": "Always reduce",
+     "math": "\\dfrac{12}{15}=\\dfrac{\\hl{3}\\cdot 4}{\\hl{3}\\cdot 5}=\\dfrac{4}{5}",
+     "caption": "Find a common factor and cancel it."
+    }
+   ]
+  },
+  {
+   "topic": "Subtracting a whole expression",
+   "explanation": "When you divide powers with the same base, you subtract the whole bottom exponent. If that exponent has two terms, the minus sign hits both of them.",
+   "steps": [
+    {
+     "label": "Keep the parentheses",
+     "math": "(-k+2)\\,\\warn{-}\\,(3k+7)",
+     "caption": "The minus belongs to everything in the second parentheses."
+    },
+    {
+     "label": "Distribute the minus",
+     "math": "-k+2\\,\\warn{-3k}\\,\\warn{-7}",
+     "caption": "+3k becomes −3k, and +7 becomes −7."
+    },
+    {
+     "label": "Combine like terms",
+     "math": "\\hl{-k-3k}+\\hl{2-7}",
+     "caption": "k terms together, numbers together."
+    },
+    {
+     "label": "Done",
+     "math": "-4k-5",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "topic": "Rewriting with the same base",
+   "explanation": "To solve 'match the exponents' problems, both sides need the same base. Know the small powers of 2 and 3 by heart, and remember that a power to a power multiplies.",
+   "steps": [
+    {
+     "label": "Know these",
+     "math": "4=2^{2}\\quad 8=2^{3}\\quad 16=2^{4}\\quad 9=3^{2}\\quad 27=3^{3}",
+     "caption": "Small powers of 2 and 3 show up constantly."
+    },
+    {
+     "label": "Rewrite",
+     "math": "27^{7}=(3^{3})^{7}",
+     "caption": "Swap 27 for 3³."
+    },
+    {
+     "label": "Power to a power: multiply",
+     "math": "(3^{3})^{7}=3^{\\hl{3\\cdot 7}}=3^{21}",
+     "caption": "3 · 7 = 21."
+    },
+    {
+     "label": "Works on variable exponents too",
+     "math": "9^{k-2}=(3^{2})^{k-2}=3^{\\hl{2k-4}}",
+     "caption": "Multiply the whole exponent by 2."
+    }
+   ]
+  }
+ ],
+ "practice": [
+  {
+   "n": 1,
+   "section": "Simplify to one value, no exponents",
+   "prompt": "Simplify to one value.",
+   "problem": "\\left(\\left(\\dfrac{1}{2}\\right)^{-3}-4\\right)^{-2}",
+   "answer": "\\dfrac{1}{16}",
+   "worked_solution": [
+    "\\left(\\dfrac12\\right)^{-3}=2^3=8",
+    "8-4=4",
+    "4^{-2}=\\dfrac{1}{16}"
+   ],
+   "check": {
+    "type": "expr",
+    "given_expr": "((1/2)^(-3)-4)^(-2)",
+    "expected": "1/16"
+   },
+   "steps": [
+    {
+     "label": "Step 1 · inside first",
+     "math": "\\left(\\warn{\\left(\\tfrac{1}{2}\\right)^{-3}}-4\\right)^{-2}",
+     "caption": "Flip 1/2 to 2, then cube: 8."
+    },
+    {
+     "label": "Step 2 · finish the inside",
+     "math": "\\left(\\hl{8-4}\\right)^{-2}",
+     "caption": "Subtract inside before the outside exponent."
+    },
+    {
+     "label": "Step 3 · negative exponent",
+     "math": "\\warn{4^{-2}}=\\dfrac{1}{4^{2}}",
+     "caption": "Flip it, then square."
+    },
+    {
+     "label": "Answer",
+     "math": "\\dfrac{1}{16}",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "section": "Simplify to one value, no exponents",
+   "prompt": "Simplify to one value.",
+   "problem": "\\dfrac{6^{3}\\cdot 4^{2}}{12^{4}}",
+   "answer": "\\dfrac{1}{6}",
+   "worked_solution": [
+    "6^3=2^3\\cdot3^3,\\quad 4^2=2^4,\\quad 12^4=2^8\\cdot3^4",
+    "\\dfrac{2^{7}\\cdot3^{3}}{2^{8}\\cdot3^{4}}",
+    "=\\dfrac{1}{2\\cdot3}=\\dfrac16"
+   ],
+   "check": {
+    "type": "expr",
+    "given_expr": "6^3*4^2/12^4",
+    "expected": "1/6"
+   },
+   "steps": [
+    {
+     "label": "Step 1 · prime bases",
+     "math": "\\dfrac{(\\hl{2\\cdot 3})^{3}\\cdot(\\hl{2^{2}})^{2}}{(\\hl{2^{2}\\cdot 3})^{4}}",
+     "caption": "6 = 2·3, 4 = 2², 12 = 2²·3."
+    },
+    {
+     "label": "Step 2 · power to a power",
+     "math": "\\dfrac{2^{3}\\cdot 3^{3}\\cdot 2^{4}}{2^{8}\\cdot 3^{4}}",
+     "caption": "Every factor gets the power."
+    },
+    {
+     "label": "Step 3 · same base, add",
+     "math": "\\dfrac{\\hl{2^{7}}\\cdot 3^{3}}{2^{8}\\cdot 3^{4}}",
+     "caption": "2³·2⁴ = 2⁷."
+    },
+    {
+     "label": "Step 4 · same base, subtract",
+     "math": "\\dfrac{1}{2^{8-7}\\cdot 3^{4-3}}",
+     "caption": "More of each on the bottom, so they stay down."
+    },
+    {
+     "label": "Answer",
+     "math": "\\dfrac{1}{6}",
+     "caption": "2 · 3 = 6."
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "section": "Simplify with positive exponents only",
+   "prompt": "Simplify. Positive exponents, coefficient fully reduced.",
+   "problem": "\\dfrac{14x^{3}}{9y^{2}}\\cdot\\dfrac{6y}{35x^{5}y^{3}}",
+   "answer": "\\dfrac{4}{15x^{2}y^{4}}",
+   "worked_solution": [
+    "\\text{numbers: }\\dfrac{14\\cdot6}{9\\cdot35}=\\dfrac{84}{315}=\\dfrac{4}{15}",
+    "x:\\ \\dfrac{x^3}{x^5}=\\dfrac{1}{x^2}",
+    "y:\\ \\dfrac{y}{y^{2}\\cdot y^{3}}=\\dfrac{1}{y^4}",
+    "\\dfrac{4}{15x^2y^4}"
+   ],
+   "check": {
+    "type": "expr",
+    "given_expr": "14*x^3/(9*y^2)*6*y/(35*x^5*y^3)",
+    "expected": "4/(15*x^2*y^4)"
+   },
+   "steps": [
+    {
+     "label": "Step 1 · cancel numbers first",
+     "math": "\\dfrac{\\hl{14}x^{3}}{\\hl{9}y^{2}}\\cdot\\dfrac{\\hl{6}y}{\\hl{35}xy^{3}}",
+     "caption": "14 and 35 share 7. 6 and 9 share 3."
+    },
+    {
+     "label": "Step 1 · cancel numbers first",
+     "math": "\\dfrac{2x^{3}}{3y^{2}}\\cdot\\dfrac{2y}{5x^{5}y^{3}}",
+     "caption": "14/35 → 2/5 and 6/9 → 2/3."
+    },
+    {
+     "label": "Step 2 · numbers",
+     "math": "\\dfrac{\\hl{4}\\,x^{3}\\,y}{\\hl{15}\\,x^{5}\\,y^{5}}",
+     "caption": "2·2 = 4 and 3·5 = 15. y² · y³ = y⁵ on the bottom."
+    },
+    {
+     "label": "Step 3 · same base, subtract",
+     "math": "\\dfrac{4}{15\\,x^{5-3}\\,y^{5-1}}",
+     "caption": "More x's and y's on the bottom, so they stay down."
+    },
+    {
+     "label": "Answer",
+     "math": "\\dfrac{4}{15x^{2}y^{4}}",
+     "caption": "Check: 4/15 can't reduce further."
+    }
+   ]
+  },
+  {
+   "n": 4,
+   "section": "Simplify with positive exponents only",
+   "prompt": "Simplify. Positive exponents only.",
+   "problem": "\\left(\\dfrac{3x^{-1}y}{2x^{2}}\\right)^{3}\\left(\\dfrac{3xy^{-2}}{2y}\\right)^{-2}",
+   "answer": "\\dfrac{3y^{9}}{2x^{11}}",
+   "worked_solution": [
+    "\\text{inside: }\\dfrac{3y}{2x^{3}}\\ \\text{ and }\\ \\dfrac{3x}{2y^{3}}",
+    "\\left(\\dfrac{3y}{2x^3}\\right)^3=\\dfrac{27y^3}{8x^9}",
+    "\\left(\\dfrac{3x}{2y^3}\\right)^{-2}=\\left(\\dfrac{2y^3}{3x}\\right)^{2}=\\dfrac{4y^6}{9x^2}",
+    "\\dfrac{27\\cdot4\\,y^9}{8\\cdot9\\,x^{11}}=\\dfrac{108y^9}{72x^{11}}=\\dfrac{3y^9}{2x^{11}}"
+   ],
+   "check": {
+    "type": "expr",
+    "given_expr": "(3*x^(-1)*y/(2*x^2))^3*(3*x*y^(-2)/(2*y))^(-2)",
+    "expected": "3*y^9/(2*x^11)"
+   },
+   "steps": [
+    {
+     "label": "Step 1 · inside first",
+     "math": "\\left(\\dfrac{3\\warn{x^{-1}}y}{2x^{2}}\\right)^{3}\\left(\\dfrac{3x\\warn{y^{-2}}}{2y}\\right)^{-2}",
+     "caption": "Clean up each inside before the outside power."
+    },
+    {
+     "label": "Step 1 · inside first",
+     "math": "\\left(\\dfrac{3y}{2x^{3}}\\right)^{3}\\left(\\dfrac{3x}{2y^{3}}\\right)^{\\warn{-2}}",
+     "caption": "x⁻¹ moves down: x²·x = x³. y⁻² moves down: y·y² = y³."
+    },
+    {
+     "label": "Step 2 · flip",
+     "math": "\\left(\\dfrac{3y}{2x^{3}}\\right)^{3}\\left(\\dfrac{2y^{3}}{3x}\\right)^{2}",
+     "caption": "Negative outside power: flip it, make it +2."
+    },
+    {
+     "label": "Step 3 · power to a power",
+     "math": "\\dfrac{\\hl{27}y^{\\hl{3}}}{\\hl{8}x^{\\hl{9}}}\\cdot\\dfrac{\\hl{4}y^{\\hl{6}}}{\\hl{9}x^{\\hl{2}}}",
+     "caption": "Every factor gets the power, including the numbers."
+    },
+    {
+     "label": "Step 4 · combine",
+     "math": "\\dfrac{108\\,y^{3+6}}{72\\,x^{9+2}}",
+     "caption": "27·4 = 108, 8·9 = 72."
+    },
+    {
+     "label": "Answer",
+     "math": "\\dfrac{3y^{9}}{2x^{11}}",
+     "caption": "108/72 reduces to 3/2."
+    }
+   ]
+  },
+  {
+   "n": 5,
+   "section": "Simplify with positive exponents only",
+   "prompt": "Simplify. Coefficients fully evaluated.",
+   "problem": "\\dfrac{a^{5}}{12b^{-3}}\\cdot\\dfrac{4a^{-2}b}{3}\\div\\dfrac{2a^{-4}b^{6}}{9}",
+   "answer": "\\dfrac{a^{7}}{2b^{2}}",
+   "worked_solution": [
+    "\\text{flip: }\\dfrac{a^5}{12b^{-3}}\\cdot\\dfrac{4a^{-2}b}{3}\\cdot\\dfrac{9}{2a^{-4}b^6}",
+    "\\text{numbers: }\\dfrac{4\\cdot9}{12\\cdot3\\cdot2}=\\dfrac{36}{72}=\\dfrac12",
+    "a:\\ a^{5+(-2)-(-4)}=a^{7}",
+    "b:\\ b^{1-(-3)-6}=b^{-2}",
+    "\\dfrac{a^7}{2b^2}"
+   ],
+   "check": {
+    "type": "expr",
+    "given_expr": "a^5/(12*b^(-3))*(4*a^(-2)*b/3)/(2*a^(-4)*b^6/9)",
+    "expected": "a^7/(2*b^2)"
+   },
+   "steps": [
+    {
+     "label": "Step 1 · keep, change, flip",
+     "math": "\\dfrac{a^{5}}{12b^{-3}}\\cdot\\dfrac{4a^{-2}b}{3}\\,\\warn{\\div}\\,\\dfrac{2a^{-4}b^{6}}{9}",
+     "caption": "Dividing by a fraction is multiplying by its flip."
+    },
+    {
+     "label": "Step 1 · keep, change, flip",
+     "math": "\\dfrac{a^{5}}{12b^{-3}}\\cdot\\dfrac{4a^{-2}b}{3}\\cdot\\dfrac{9}{2a^{-4}b^{6}}",
+     "caption": ""
+    },
+    {
+     "label": "Step 2 · numbers alone",
+     "math": "\\dfrac{\\hl{4\\cdot 9}}{\\hl{12\\cdot 3\\cdot 2}}=\\dfrac{36}{72}=\\dfrac{1}{2}",
+     "caption": "Do the coefficients by themselves, then reduce."
+    },
+    {
+     "label": "Step 3 · the a's",
+     "math": "a^{5+(-2)\\warn{-(-4)}}=a^{7}",
+     "caption": "Top: a⁵ and a⁻². Bottom: a⁻⁴. 5 − 2 + 4 = 7."
+    },
+    {
+     "label": "Step 4 · the b's",
+     "math": "b^{1\\warn{-(-3)}-6}=b^{-2}",
+     "caption": "Top: b¹. Bottom: b⁻³ and b⁶. 1 + 3 − 6 = −2."
+    },
+    {
+     "label": "Answer",
+     "math": "\\dfrac{a^{7}}{2b^{2}}",
+     "caption": "b⁻² moves to the bottom."
+    }
+   ]
+  }
+ ],
+ "print_layout": [
+  5
+ ]
+}

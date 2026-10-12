@@ -1,0 +1,48 @@
+I'm attaching photos of my child's graded math test or quiz. Please turn it into a review kit for the Math Review Builder website. Reply with JSON only, in the exact format at the end.
+
+WHAT TO DO
+1. Read every page. Photos may be rotated, shadowed, or out of order; put the questions in test order. Never guess at writing you can't read: say what you couldn't read in "what_broke".
+2. For every question: copy the problem exactly, solve it yourself, and double-check your answer by working it a second way. Read my child's final answer and work, and use the teacher's marks when you can see them.
+3. Mark each question "correct", "partial", "wrong", "blank", or "unknown" (can't tell how it was graded). For partial and wrong answers, name the exact step that went wrong in one or two plain sentences a parent can follow, like "Added 25 + 16 instead of multiplying, so 1/41 instead of 1/400." Credit real partial skills. Don't invent praise.
+4. Pick 1 to 3 background skills the mistakes point to (for example fraction arithmetic, distributing a negative sign, rewriting numbers with the same base) and write a short refresher for each.
+5. Write 10 new practice problems with the same traps and fresh numbers. Mirror the test's sections, weight toward the missed types, and include one or two confidence builders. Use clean answers, sometimes one notch harder.
+6. Write a step-by-step walkthrough for every test question and every practice problem (rules below).
+7. Check every answer twice before you reply.
+
+WALKTHROUGH RULES (each walkthrough is a list of steps {"label","math","caption"})
+- The website already shows the bare problem first. Start with the first move.
+- One move per step. Mark what is about to change, then show the result in the next step.
+- Labels name the move, like "Step 1 · inside first", "Step 2 · power to a power", "Step 3 · keep, change, flip", "Check", "Answer".
+- Captions are one or two short plain sentences: the rule, and the trap at the moment it happens ("Careful: −2 × −6 = +12, not −12").
+- Simplify problems end with an "Answer" step. Solve problems end with a "Check" step that substitutes the answer back.
+- 3 to 7 steps each.
+
+MATH FORMAT
+- Write all math (problem, answer, student_answer, math, worked_solution) in LaTeX without $ signs: \dfrac{a}{b} for fractions, \left( \right) for tall parentheses, \cdot for times.
+- Two highlight commands: \hl{...} marks the terms being combined in this step (shown purple); \warn{...} marks a sign, a negative exponent being applied, or an operation changing (shown yellow).
+- This is JSON, so every backslash is doubled inside strings: "\\dfrac{1}{2}".
+- "check" lets the website double-check your answer by plugging in numbers. Use math.js syntax: * for every multiplication, ^ for powers, x^(-3) for negative exponents, single-letter variables.
+  Simplify or evaluate: {"type":"expr","given_expr":"(5/2^(-2))^(-2)","expected":"1/400"}
+  Solve: {"type":"solve","lhs":"x^(-k+2)/x^(3k+7)","rhs":"x^15","var":"k","expected":"-5"}
+  Use null when the answer can't be checked this way (explain-why questions, graphs, word problems without an expression).
+
+LENGTH
+If the whole kit won't fit in one reply, send it in two parts. Part 1 is the full JSON object without "practice". End part 1 there and I'll reply "continue". Part 2 is a second JSON object holding only {"practice":[...]}. Never stop in the middle of a JSON object.
+
+FORMAT (reply with only this JSON)
+{
+ "title": "Chapter 8 Exponents Review",
+ "course": "Algebra 1",
+ "score": "the score on the test, or empty",
+ "student_summary": "3 to 4 plain sentences for the parent: what is solid, where the points went (question numbers), what the practice focuses on.",
+ "test_questions": [
+  {"n": 1, "section": "Simplify to one value", "prompt": "Simplify.", "problem": "(-2)^3\\cdot(-4)^{-2}", "answer": "-\\dfrac{1}{2}", "student_answer": "-128", "status": "wrong", "points": "1/3", "what_broke": "...", "check": {"type":"expr","given_expr":"(-2)^3*(-4)^(-2)","expected":"-1/2"},
+   "steps": [{"label": "Step 1 · odd power", "math": "\\hl{(-2)^3}\\cdot(-4)^{-2}", "caption": "An odd power of a negative stays negative: −8."}]}
+ ],
+ "background": [
+  {"topic": "...", "explanation": "2 to 3 plain sentences.", "steps": [{"label": "...", "math": "...", "caption": "..."}]}
+ ],
+ "practice": [
+  {"n": 1, "section": "...", "prompt": "Simplify.", "problem": "...", "answer": "...", "worked_solution": ["line 1 in LaTeX", "line 2"], "check": {...}, "steps": [...]}
+ ]
+}
