@@ -687,7 +687,7 @@ function landing(){
       <a class="preview-card" href="example.html"><img src="${THUMBS.walk}" alt="A walkthrough step from the example: the minus sign distributed across 3k + 7, highlighted in yellow, with the caption 'The minus hits both pieces.'" width="560" height="313"><span><strong>Step-by-step walkthroughs</strong>Every question, one move at a time, with the trap called out</span></a>
       <a class="preview-card" href="example.html"><img src="${THUMBS.sheet}" alt="The first page of the printable practice sheet, with boxed work space for each problem" width="560" height="436"><span><strong>Printable practice and answer key</strong>New problems with the same traps, plus every step worked out</span></a>
     </div>`:''}
-    <div class="row"><a class="ctl play" href="example.html" style="display:inline-flex;align-items:center;text-decoration:none">See the full example</a>${CLAUDE_BUILDER_URL?`<a class="ctl" href="${esc(CLAUDE_BUILDER_URL)}" style="display:inline-flex;align-items:center;text-decoration:none" target="_blank" rel="noopener">Use Claude? Skip the copy and paste</a>`:''}</div></header>
+    <div class="row"><a class="ctl play" href="example.html" style="display:inline-flex;align-items:center;text-decoration:none">See the full example</a>${CLAUDE_BUILDER_URL?`<a class="ctl" href="${esc(CLAUDE_BUILDER_URL)}" style="display:inline-flex;align-items:center;text-decoration:none" target="_blank" rel="noopener">Have Claude? Upload photos directly</a>`:''}</div></header>
 
   <div class="bpanel"><h2>1. Copy the prompt</h2>
     <p>This tells the AI exactly what to build and in what format.</p>
@@ -696,6 +696,7 @@ function landing(){
   </div>
 
   <div class="bpanel"><h2>2. Ask your AI</h2>
+    ${CLAUDE_BUILDER_URL?`<p class="muted">If you use Claude, you can skip these steps: <a href="${esc(CLAUDE_BUILDER_URL)}" target="_blank" rel="noopener" style="color:var(--accent)">open the Claude version</a>, upload the photos, and it builds the kit for you on your own Claude account.</p>`:''}
     <p>Start a new chat in Claude, ChatGPT, or Gemini. Attach a photo of every page of the graded test, paste the prompt, and send it. Use the strongest model your plan offers; the answer takes a few minutes.</p>
     <p class="muted">Cropping out your child's name is fine; it isn't needed. If the answer stops partway or comes in two parts, reply "continue" and keep everything it sends.</p>
   </div>

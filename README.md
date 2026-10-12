@@ -21,7 +21,7 @@ The example is a real Algebra 1 exponents test (16 questions, score removed), so
 
 From there you can print the practice sheet and the answer key, or download the whole review as one file that works offline.
 
-Inside Claude there is also a photo builder that skips the copy and paste. Claude reads the test on your own Claude account, shows you what it read so you can fix anything, then builds the kit, checking its answers as it goes.
+Inside Claude there is also a [photo builder](https://claude.ai/artifact/CZaCAsKoEEF2M2cJFHyk2Q) that skips the copy and paste. Claude reads the test on your own Claude account, shows you what it read so you can fix anything, then builds the kit, checking its answers as it goes.
 
 ## Can I trust the answers?
 

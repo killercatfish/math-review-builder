@@ -12,7 +12,8 @@ import base64, json, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NM = os.path.join(ROOT, 'node_modules')
-CLAUDE_URL = os.environ.get('CLAUDE_BUILDER_URL', '')
+# The photo builder published as a Claude artifact (runs on each visitor's own Claude account).
+CLAUDE_URL = os.environ.get('CLAUDE_BUILDER_URL', 'https://claude.ai/artifact/CZaCAsKoEEF2M2cJFHyk2Q')
 
 def read(*p, mode='r'):
     with open(os.path.join(ROOT, *p), mode) as f:
