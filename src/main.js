@@ -45,8 +45,41 @@ function runCheck(chk){
   return {ok:null};
 }
 function verify(chk){ try{ return runCheck(chk).ok; }catch(e){ return false; } }
+/* Convert a simple LaTeX answer into math.js, or null when it isn't simple enough to trust. */
+function latexToMath(src){
+  if(typeof src!=='string') return null;
+  let t=src.replace(/\\(?:hl|warn)\{/g,'{').replace(/\\checkmark|\\[,;: !]|\\quad|\\qquad/g,' ').replace(/\\left|\\right/g,'').trim();
+  if(/\\text|\\ne|\\le|\\ge|\\pm|\\sqrt|\\pi|,|\\lt|\\gt|<|>/.test(t)) return null;
+  t=t.replace(/^\s*[a-z]\s*=\s*/i,'');
+  const parts=t.split('='); t=parts[parts.length-1].trim(); if(!t) return null;
+  for(let guard=0;guard<20;guard++){
+    const i=t.search(/\\[dt]?frac\{/); if(i<0) break;
+    const a=braced(t,t.indexOf('{',i)); if(!a) return null; const b=t[a[1]]==='{'?braced(t,a[1]):null; if(!b) return null;
+    t=t.slice(0,i)+'(('+a[0]+')/('+b[0]+'))'+t.slice(b[1]);
+  }
+  t=t.replace(/\\(?:cdot|times)/g,'*').replace(/\^\{/g,'^(').replace(/\{/g,'(').replace(/\}/g,')');
+  if(/\\/.test(t)) return null;
+  t=t.replace(/\s+/g,'').replace(/([0-9a-zA-Z)])(?=[a-zA-Z(])/g,'$1*');
+  return t;
+}
+function answerAgrees(latex, chk){
+  const expr=latexToMath(latex); if(expr==null||!chk) return null;
+  try{
+    if(chk.type==='expr') return runCheck({type:'expr',given_expr:chk.given_expr,expected:expr}).ok;
+    if(chk.type==='solve') return runCheck({type:'solve',lhs:chk.lhs,rhs:chk.rhs,var:chk.var,expected:expr}).ok;
+  }catch(e){ return null; }
+  return null;
+}
+function itemTrust(it){
+  const chk=it&&it.check; if(!chk) return null;
+  const base=verify(chk); if(base!==true) return base;
+  if(answerAgrees(it.answer,chk)===false) return false;
+  const last=(it.steps||[]).slice().reverse().find(s=>/^\s*answer\b/i.test(s.label||''));
+  if(last && answerAgrees(last.math,chk)===false) return false;
+  return true;
+}
 function checkTag(chk){
-  const r=verify(chk);
+  const r=(chk&&('check' in chk||'steps' in chk))?itemTrust(chk):verify(chk);
   if(r===true) return '<span class="check good" title="Checked by plugging in numbers">✓ checked</span>';
   if(r===false) return '<span class="check flag">double-check this one</span>';
   return '';
@@ -95,13 +128,13 @@ function station(chipHost, panelHost, items, kind){
     [...chipHost.children].forEach((c,k)=>c.setAttribute('aria-pressed',String(k===idx)));
     let head='';
     if(kind==='test'){
-      head=`<div class="panel-head"><h3>Question ${esc(it.n)}</h3><span class="pill" data-s="${esc(it.status)}">${esc(STATUS[it.status]||it.status)}</span>${it.points?`<span class="pts">${esc(it.points)} pts</span>`:''}${checkTag(it.check)}</div>
+      head=`<div class="panel-head"><h3>Question ${esc(it.n)}</h3><span class="pill" data-s="${esc(it.status)}">${esc(STATUS[it.status]||it.status)}</span>${it.points?`<span class="pts">${esc(it.points)} pts</span>`:''}${checkTag(it)}</div>
       <p class="prompt">${esc([it.section,it.prompt].filter(Boolean).join(' · '))}</p>`;
       if(it.what_broke){
         head+=`<details class="broke"><summary>What happened on the test</summary><p>${esc(it.what_broke)}</p>${it.student_answer?`<div class="yours">On the test: ${tex(it.student_answer,false)}</div>`:''}</details>`;
       }
     } else {
-      head=`<div class="panel-head"><h3>Practice ${esc(it.n)}</h3><span class="pts">${esc(it.section||'')}</span>${checkTag(it.check)}</div><p class="prompt">${esc(it.prompt||'')}</p>`;
+      head=`<div class="panel-head"><h3>Practice ${esc(it.n)}</h3><span class="pts">${esc(it.section||'')}</span>${checkTag(it)}</div><p class="prompt">${esc(it.prompt||'')}</p>`;
     }
     panelHost.innerHTML=`<div class="panel">${head}<div class="player"></div></div>`;
     current=Player(panelHost.querySelector('.player'),it,{});
@@ -196,7 +229,7 @@ function readKit(text){
   const {parts, cutOff}=extractObjects(t);
   if(cutOff) return {error:"The AI's answer got cut off before the end. Reply \"continue\" to the AI, then paste everything it sent, one part after the other."};
   const objs=[]; let lastErr='';
-  parts.forEach(p=>{ try{ objs.push(JSON.parse(p)); }catch(e){ try{ objs.push(JSON.parse(repairBackslashes(p))); }catch(e2){ lastErr=String(e.message||''); } } });
+  parts.forEach(p=>{ const v=parseLenient(p); if(v.ok) objs.push(v.value); else lastErr=v.error; });
   const kitParts=objs.filter(o=>o&&typeof o==='object'&&!Array.isArray(o)&&(o.test_questions||o.practice||o.background||o.title));
   if(!kitParts.length){
     if(lastErr) return {error:"This isn't valid JSON ("+lastErr+"). Ask the AI to send the kit again as JSON only."};
@@ -214,18 +247,63 @@ function readKit(text){
   return {kit:fixKit(kit)};
 }
 
+/* Try strict JSON, then repaired backslashes, then undo markdown escaping
+   (copying a chat reply's rendered text instead of its code block adds \* and extra backslashes). */
+function undoMarkdown(s){ return s.replace(/\\\\\\(?=[^\\])/g,'\\\\').replace(/\\([*_#>`~\[\]()|!+.-])/g,'$1'); }
+function parseLenient(p){
+  const looksMarkdown=/\\\*|\\_|\\\\\\[A-Za-z]/.test(p);
+  const plain=[p, repairBackslashes(p)], md=[undoMarkdown(p), repairBackslashes(undoMarkdown(p))];
+  const tries=looksMarkdown?md.concat(plain):plain.concat(md);
+  let first='';
+  for(const t of tries){ try{ return {ok:true,value:JSON.parse(t)}; }catch(e){ if(!first) first=String(e.message||''); } }
+  return {ok:false,error:first};
+}
+
 /* LaTeX inside JSON is fragile: "\frac" parses as a form feed + "rac", "\dfrac" doesn't parse at all.
    repairBackslashes doubles lone backslashes before parsing; fixLatex undoes control characters after. */
-function repairBackslashes(s){ return s.replace(/\\(?!["\\/bfnrtu])/g,'\\\\'); }
+function repairBackslashes(s){
+  // Walk escape pairs: keep valid JSON escapes, double any lone backslash (\dfrac becomes \\dfrac).
+  let out='';
+  for(let i=0;i<s.length;i++){
+    const c=s[i]; if(c!=='\\'){ out+=c; continue; }
+    const n=s[i+1];
+    if(n!==undefined && '"\\/bfnrt'.includes(n)){ out+=c+n; i++; }
+    else if(n==='u' && /^[0-9a-fA-F]{4}$/.test(s.substr(i+2,4))){ out+=c+n; i++; }
+    else out+='\\\\';
+  }
+  return out;
+}
 function fixLatex(s){
   if(typeof s!=='string') return s;
-  return s.replace(/\f/g,'\\f').replace(/\t/g,'\\t').replace(/\x08/g,'\\b').replace(/\r/g,'\\r').replace(/\n(?=[a-zA-Z])/g,'\\n');
+  return s.replace(/\f/g,'\\f').replace(/\t/g,'\\t').replace(/\x08/g,'\\b').replace(/\r/g,'\\r').replace(/\n(?=[a-zA-Z])/g,'\\n')
+          .replace(/\\\\(?=[,;:!])/g,'\\'); // "\\," meant the thin space "\,"
 }
-function fixSteps(steps){ return Array.isArray(steps)?steps.filter(Boolean).map(s=>({label:String(s.label||''),math:fixLatex(String(s.math||'')),caption:String(s.caption||'')})):[]; }
+/* Labels and captions are plain text. Some AIs put LaTeX in them anyway; turn it into readable text. */
+const SUP={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻','+':'⁺','(':'⁽',')':'⁾','n':'ⁿ','k':'ᵏ','x':'ˣ','a':'ᵃ','b':'ᵇ','y':'ʸ','m':'ᵐ','i':'ⁱ'};
+function sup(t){ t=t.replace(/\s+/g,''); return [...t].every(c=>SUP[c])?[...t].map(c=>SUP[c]).join(''):'^('+t+')'; }
+function braced(s,i){ // s[i]==='{' -> [inner, indexAfter]
+  let d=0; for(let j=i;j<s.length;j++){ if(s[j]==='{') d++; else if(s[j]==='}'){ d--; if(d===0) return [s.slice(i+1,j),j+1]; } } return null; }
+function plainMath(s){
+  if(typeof s!=='string'||s.indexOf('\\')<0&&s.indexOf('^{')<0) return s;
+  let t=s.replace(/\\·/g,'·');
+  for(let guard=0;guard<20;guard++){ // fractions, innermost first
+    const i=t.search(/\\[dt]?frac\{/); if(i<0) break;
+    const a=braced(t,t.indexOf('{',i)); if(!a) break; const b=t[a[1]]==='{'?braced(t,a[1]):null; if(!b) break;
+    const wrap=x=>/^[\w.]+$/.test(x)?x:'('+x+')';
+    t=t.slice(0,i)+wrap(a[0])+'/'+wrap(b[0])+t.slice(b[1]);
+  }
+  t=t.replace(/\\(?:hl|warn|text|mathrm|textbf)\{([^{}]*)\}/g,'$1')
+     .replace(/\\left|\\right/g,'').replace(/\\(?:cdot|centerdot)/g,'·').replace(/\\times/g,'×')
+     .replace(/\\(?:implies|Rightarrow)/g,'⇒').replace(/\\neq?\b/g,'≠').replace(/\\le(?:q)?\b/g,'≤').replace(/\\ge(?:q)?\b/g,'≥')
+     .replace(/\\(?:quad|qquad)/g,' ').replace(/\\[,;: !]/g,' ').replace(/\\checkmark/g,'✓');
+  t=t.replace(/\^\{([^{}]*)\}/g,(_,x)=>sup(x)).replace(/\^(-?\w)/g,(_,x)=>sup(x));
+  return t.replace(/\\([A-Za-z]+)/g,'$1').replace(/[{}]/g,'').replace(/\\/g,'').replace(/ {2,}/g,' ').trim();
+}
+function fixSteps(steps){ return Array.isArray(steps)?steps.filter(Boolean).map(s=>({label:plainMath(String(s.label||'')),math:fixLatex(String(s.math||'')),caption:plainMath(String(s.caption||''))})):[]; }
 function fixKit(k){
-  (k.test_questions||[]).forEach(q=>{ ['problem','answer','student_answer'].forEach(f=>q[f]=fixLatex(q[f])); q.steps=fixSteps(q.steps); });
+  (k.test_questions||[]).forEach(q=>{ ['problem','answer','student_answer'].forEach(f=>q[f]=fixLatex(q[f])); q.what_broke=plainMath(q.what_broke||''); q.steps=fixSteps(q.steps); });
   (k.practice||[]).forEach(p=>{ p.problem=fixLatex(p.problem); p.answer=fixLatex(p.answer); p.worked_solution=(p.worked_solution||[]).map(fixLatex); p.steps=fixSteps(p.steps); });
-  (k.background||[]).forEach(b=>{ b.steps=fixSteps(b.steps); });
+  (k.background||[]).forEach(b=>{ b.explanation=plainMath(b.explanation||''); b.steps=fixSteps(b.steps); });
   return k;
 }
 
@@ -623,7 +701,7 @@ function landing(){
   </div>
 
   <div class="bpanel"><h2>3. Paste the AI's answer here</h2>
-    <p>Paste the whole answer, including both parts if there were two. The kit is built right here in your browser.</p>
+    <p>Paste the whole answer, including both parts if there were two. If the AI shows its answer in a box with a Copy button, use that button; it copies cleanly. The kit is built right here in your browser.</p>
     <div class="field"><label for="kit-input">The AI's answer</label><textarea id="kit-input" spellcheck="false" style="min-height:200px;font:13px/1.45 var(--f-mono)" placeholder='{ "title": "...", "test_questions": [...], "practice": [...] }'></textarea></div>
     <p class="loader-error" id="kit-error" role="alert" hidden></p>
     <div class="row"><button class="ctl play" id="kit-build">Build the review</button></div>
@@ -688,6 +766,8 @@ const WALK_STYLE = String.raw`WALKTHROUGH STYLE (each walkthrough is a list of f
 - Simplify/evaluate problems end with an "Answer" frame. Solve problems end with a "Check" frame that substitutes back.
 - "Create" questions: walk through one sample answer and say other answers work. "Explain why" questions: animate the reasoning.
 - 3 to 7 frames.
+- Labels and captions are plain text with no LaTeX or backslashes; write small math like 2⁻² = 1/4. Only "math" uses LaTeX.
+- The final frame must show the same answer as "correct_answer". Never leave second thoughts or corrections in a caption.
 EXAMPLE for (5/2^{-2})^{-2}:
 [{"label":"Step 1 · inside first","math":"\\left(\\dfrac{5}{\\warn{2^{-2}}}\\right)^{-2}","caption":"Clean up the negative exponent inside first. 2⁻² = 1/4."},
  {"label":"Step 2 · multiply","math":"\\left(\\hl{5\\cdot 4}\\right)^{-2}","caption":"Dividing by 1/4 is multiplying by 4."},

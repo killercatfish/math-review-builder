@@ -97,6 +97,33 @@ async def main():
         bs = await badges(pg)
         check('landing: two-part answer with unescaped LaTeX builds the full kit', len(bs) == 10 and all(x == '✓ checked' for x in bs), bs)
         check('landing: print and download buttons on the built kit', await pg.locator('.toolbar [data-p]').count() == 2 and await pg.locator('#dl-html').count() == 1)
+
+        # Messy AI answers
+        async def paste(text):
+            await pg.goto(DOCS + '/index.html'); await pg.wait_for_timeout(200)
+            await pg.evaluate("localStorage.clear()")
+            await pg.goto(DOCS + '/index.html'); await pg.wait_for_timeout(200)
+            await pg.fill('#kit-input', text); await pg.click('#kit-build'); await pg.wait_for_timeout(300)
+        # Copying a chat reply's rendered text (not its code block) adds a backslash and escapes '*'.
+        md = json.dumps(KIT).replace('\\\\', '\\\\\\').replace('*', '\\*')
+        await paste(md)
+        bs = await badges(pg)
+        check('messy: markdown-escaped copy still builds and checks', len(bs) == 10 and all(x == '✓ checked' for x in bs), bs)
+        bad = json.loads(json.dumps(KIT))
+        bad['practice'][0]['answer'] = '-\\dfrac{9}{8}'
+        bad['test_questions'][1]['steps'][-1]['math'] = '\\dfrac{1}{25}'
+        bad['test_questions'][0]['steps'][0]['caption'] = 'So (-4)^{-2} = \\dfrac{1}{16} \\cdot 2'
+        bad['test_questions'][0]['steps'][0]['label'] = 'Step 1 \\cdot odd power'
+        await paste(json.dumps(bad))
+        bs = await badges(pg)
+        check('messy: wrong answer field is flagged', bs[5] == 'double-check this one', bs)
+        check('messy: final step that disagrees is flagged', bs[1] == 'double-check this one', bs)
+        check('messy: other answers still pass', [b for i, b in enumerate(bs) if i not in (1, 5)] == ['✓ checked'] * 8, bs)
+        await pg.click('#test-chips .chip >> nth=0')
+        cap = await pg.text_content('#test-panel .caption')
+        await pg.click('#test-panel .next')
+        cap = await pg.text_content('#test-panel .caption'); lab = await pg.text_content('#test-panel .flabel')
+        check('messy: LaTeX in captions and labels becomes readable text', cap == 'So (-4)⁻² = 1/16 · 2' and lab == 'Step 1 · odd power', [lab, cap])
         check('landing: no page errors', not errs, errs)
         await pg.close()
 
