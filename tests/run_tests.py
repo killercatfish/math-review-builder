@@ -80,6 +80,7 @@ async def main():
         await pg.goto(DOCS + '/index.html'); await pg.wait_for_timeout(400)
         check('landing: shown outside Claude', await pg.is_visible('#landing'))
         prompt = await pg.text_content('#prompt-text')
+        check('landing: both example thumbnails load', await pg.evaluate("[...document.querySelectorAll('.preview-card img')].filter(i=>i.complete&&i.naturalWidth>0).length") == 2)
         check('landing: parent prompt is filled in', 'test_questions' in prompt and len(prompt) > 2000)
         await pg.screenshot(path=os.path.join(OUT, 'landing-phone.png'), full_page=True)
         full = json.dumps(KIT)

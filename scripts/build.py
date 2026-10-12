@@ -4,7 +4,9 @@ Inlines KaTeX (with its fonts), math.js, the parent prompt and the main script i
 src/template.html so every page works offline as a single file.
 
   docs/index.html    the builder: photo builder inside Claude, copy-and-paste landing everywhere else
-  docs/example.html  the fictional example kit, baked in
+  docs/example.html  the example kit, baked in
+
+The landing page previews come from examples/thumb-*.jpg (made by scripts/make_thumbnails.py).
 """
 import base64, json, os, re, sys
 
@@ -33,6 +35,12 @@ def page(kit=None, title=None):
     main = read('src', 'main.js')
     main = main.replace('/*PARENT_PROMPT*/""', json.dumps(read('prompt', 'parent-prompt.txt'), ensure_ascii=False))
     main = main.replace('/*CLAUDE_URL*/""', json.dumps(CLAUDE_URL))
+    thumbs = {}
+    for key, name in (('walk', 'thumb-walkthrough.jpg'), ('sheet', 'thumb-sheet.jpg')):
+        path = os.path.join(ROOT, 'examples', name)
+        if os.path.exists(path):
+            thumbs[key] = 'data:image/jpeg;base64,' + base64.b64encode(read('examples', name, mode='rb')).decode()
+    main = main.replace('/*THUMBS*/{}', json.dumps(thumbs))
     i = t.index('<script data-kit="main">')
     t = t[:i] + '<script data-kit="main">\n' + no_script_close(main) + '\n</script>\n'
     t = (t.replace('/*KATEX_CSS*/', katex_css())

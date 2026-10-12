@@ -8,6 +8,7 @@ const IN_CLAUDE = !!(window.claude && typeof window.claude.use === 'function');
 const STORE_KEY='review-kit:last';
 const PARENT_PROMPT = /*PARENT_PROMPT*/"";
 const CLAUDE_BUILDER_URL = /*CLAUDE_URL*/"";
+const THUMBS = /*THUMBS*/{};
 const REPO_URL = 'https://github.com/killercatfish/math-review-builder';
 
 /* ================= shared helpers ================= */
@@ -604,7 +605,11 @@ function landing(){
   root.innerHTML=`
   <header><div class="eyebrow">Free for parents</div><h1>Math Test Review Builder</h1>
     <p class="summary">Turn photos of your child's graded math test into a step-by-step walkthrough of every question, new practice problems with the same traps, and a printable practice sheet with an answer key. It works with the AI you already use, and nothing is uploaded to this site.</p>
-    <div class="row"><a class="ctl" href="example.html" style="display:inline-flex;align-items:center;text-decoration:none">See an example kit</a>${CLAUDE_BUILDER_URL?`<a class="ctl" href="${esc(CLAUDE_BUILDER_URL)}" style="display:inline-flex;align-items:center;text-decoration:none" target="_blank" rel="noopener">Use Claude? Skip the copy and paste</a>`:''}</div></header>
+    ${THUMBS.walk&&THUMBS.sheet?`<div class="previews" aria-label="What you get">
+      <a class="preview-card" href="example.html"><img src="${THUMBS.walk}" alt="A walkthrough step from the example: the minus sign distributed across 3k + 7, highlighted in yellow, with the caption 'The minus hits both pieces.'" width="560" height="313"><span><strong>Step-by-step walkthroughs</strong>Every question, one move at a time, with the trap called out</span></a>
+      <a class="preview-card" href="example.html"><img src="${THUMBS.sheet}" alt="The first page of the printable practice sheet, with boxed work space for each problem" width="560" height="436"><span><strong>Printable practice and answer key</strong>New problems with the same traps, plus every step worked out</span></a>
+    </div>`:''}
+    <div class="row"><a class="ctl play" href="example.html" style="display:inline-flex;align-items:center;text-decoration:none">See the full example</a>${CLAUDE_BUILDER_URL?`<a class="ctl" href="${esc(CLAUDE_BUILDER_URL)}" style="display:inline-flex;align-items:center;text-decoration:none" target="_blank" rel="noopener">Use Claude? Skip the copy and paste</a>`:''}</div></header>
 
   <div class="bpanel"><h2>1. Copy the prompt</h2>
     <p>This tells the AI exactly what to build and in what format.</p>

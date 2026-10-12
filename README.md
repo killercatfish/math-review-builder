@@ -43,6 +43,7 @@ One JSON file drives everything: the walkthroughs, the practice problems, the pr
 | `examples/chapter8-real-kit.json` | The example on the site: a real Algebra 1 exponents test, used with permission, score removed |
 | `examples/example-kit.json` | A small fictional kit used by the tests |
 | `scripts/build.py` | Inlines KaTeX, math.js, the prompt, and the script into single-file pages |
+| `scripts/make_thumbnails.py` | Renders the landing-page preview images from the example kit |
 | `docs/` | The built site, served by GitHub Pages |
 | `tests/run_tests.py` | End-to-end checks with Playwright |
 
@@ -51,6 +52,7 @@ One JSON file drives everything: the walkthroughs, the practice problems, the pr
 ```sh
 npm install                 # KaTeX and math.js, inlined at build time
 python3 scripts/build.py    # writes docs/index.html, docs/example.html, build/artifact.html
+python3 scripts/make_thumbnails.py  # optional: refresh the landing-page previews, then build again
 python3 tests/run_tests.py  # needs: pip install playwright pillow && playwright install chromium
 ```
 
