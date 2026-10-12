@@ -17,7 +17,7 @@ The example is a real Algebra 1 exponents test (16 questions, score removed), so
 
 1. Open the builder and copy the prompt.
 2. Start a new chat with your AI, attach a photo of every page of the graded test, paste the prompt, and send.
-3. Paste the AI's answer back into the builder. The review is built in your browser.
+3. Paste the AI's answer back into the builder and check what it read: AI can misread handwriting or a teacher's marks, so you can fix any question before the review is built in your browser.
 
 From there you can print the practice sheet and the answer key, or download the whole review as one file that works offline.
 

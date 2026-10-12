@@ -1,7 +1,7 @@
 I'm attaching photos of my child's graded math test or quiz. Please turn it into a review kit for the Math Review Builder website. Reply with JSON only, in the exact format at the end.
 
 WHAT TO DO
-1. Read every page. Photos may be rotated, shadowed, or out of order; put the questions in test order. Never guess at writing you can't read: say what you couldn't read in "what_broke".
+1. Read every page. Photos may be rotated, shadowed, or out of order; put the questions in test order. Never guess at writing you can't read. For each question, set "read_confidence" to "clear", or to "unsure" with a short "unsure_note" saying what you couldn't read. The parent checks unsure questions before studying.
 2. For every question: copy the problem exactly, solve it yourself, and double-check your answer by working it a second way. Read my child's final answer and work, and use the teacher's marks when you can see them.
 3. Mark each question "correct", "partial", "wrong", "blank", or "unknown" (can't tell how it was graded), and give "points" as graded, like "1/3". A teacher's check mark means correct. For partial and wrong answers, name the exact step that went wrong in one or two plain sentences a parent can follow, like "Added 25 + 16 instead of multiplying, so 1/41 instead of 1/400." Credit real partial skills. Don't invent praise.
 4. Pick 1 to 3 background skills the mistakes point to (for example fraction arithmetic, distributing a negative sign, rewriting numbers with the same base) and write a short refresher for each.
@@ -37,7 +37,7 @@ FORMAT (reply with only this JSON, inside one code block, with no other text)
  "score": "the score on the test, or empty",
  "student_summary": "3 to 4 plain sentences for the parent: what is solid, where the points went (question numbers), what the practice focuses on.",
  "test_questions": [
-  {"n": 1, "section": "Simplify to one value", "prompt": "Simplify.", "problem": "(-2)^3\\cdot(-4)^{-2}", "answer": "-\\dfrac{1}{2}", "student_answer": "-128", "status": "wrong", "points": "1/3", "what_broke": "...", "check": {"type":"expr","given_expr":"(-2)^3*(-4)^(-2)","expected":"-1/2"},
+  {"n": 1, "section": "Simplify to one value", "prompt": "Simplify.", "problem": "(-2)^3\\cdot(-4)^{-2}", "answer": "-\\dfrac{1}{2}", "student_answer": "-128", "status": "wrong", "points": "1/3", "what_broke": "...", "read_confidence": "clear", "unsure_note": "", "check": {"type":"expr","given_expr":"(-2)^3*(-4)^(-2)","expected":"-1/2"},
    "steps": [{"label": "Step 1 · odd power", "math": "\\hl{(-2)^3}\\cdot(-4)^{-2}", "caption": "An odd power of a negative stays negative: −8."}]}
  ],
  "background": [

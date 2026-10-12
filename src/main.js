@@ -129,7 +129,8 @@ function station(chipHost, panelHost, items, kind){
     let head='';
     if(kind==='test'){
       head=`<div class="panel-head"><h3>Question ${esc(it.n)}</h3><span class="pill" data-s="${esc(it.status)}">${esc(STATUS[it.status]||it.status)}</span>${it.points?`<span class="pts">${esc(it.points)} pts</span>`:''}${checkTag(it)}</div>
-      <p class="prompt">${esc([it.section,it.prompt].filter(Boolean).join(' · '))}</p>`;
+      <p class="prompt">${esc([it.section,it.prompt].filter(Boolean).join(' · '))}</p>
+      ${it.edited?'<p class="prompt" style="color:var(--part);font-weight:700">You changed this question after the AI read it. Check that the walkthrough still matches.</p>':''}`;
       if(it.what_broke){
         head+=`<details class="broke"><summary>What happened on the test</summary><p>${esc(it.what_broke)}</p>${it.student_answer?`<div class="yours">On the test: ${tex(it.student_answer,false)}</div>`:''}</details>`;
       }
@@ -551,36 +552,7 @@ function builder(){
     drawQuestions();
     $id('b-confirm').scrollIntoView({behavior:'smooth',block:'start'});
   }
-  function drawQuestions(){
-    const list=$id('qlist'); list.innerHTML='';
-    readResult.questions.forEach((q,k)=>{
-      const c=document.createElement('div'); c.className='qcard'+(q.unsure?' unsure editing':'');
-      const opts=Object.keys(STATUS).map(s=>`<option value="${s}"${s===q.status?' selected':''}>${STATUS[s]}</option>`).join('');
-      c.innerHTML=`<div class="qhead"><strong>#${esc(q.n)}</strong>
-        <label class="sr" style="position:absolute;left:-9999px" for="st-${k}">Status</label><select id="st-${k}">${opts}</select>
-        <label class="sr" style="position:absolute;left:-9999px" for="pt-${k}">Points</label><input id="pt-${k}" value="${esc(q.points)}" placeholder="points">
-        <button class="ctl ghost edit-toggle" id="ed-${k}" aria-pressed="${q.unsure?'true':'false'}">Edit</button><button class="ctl ghost rm" id="rm-${k}">Remove</button></div>
-        ${q.unsure?`<p class="unsure-note">Not sure: ${esc(q.unsure_note||'part of this was hard to read.')}</p>`:''}
-        ${fieldHTML(k,'problem','Problem',q.problem,true)}
-        ${fieldHTML(k,'answer','Correct answer',q.answer,true)}
-        ${fieldHTML(k,'student_answer','Answer on the test',q.student_answer,true)}
-        <div class="field"><label for="wb-${k}">What happened</label><textarea id="wb-${k}">${esc(q.what_broke)}</textarea><p class="wb-view">${esc(q.what_broke||'Nothing to note.')}</p></div>`;
-      list.appendChild(c);
-      c.querySelector('#ed-'+k).onclick=e=>{ const on=c.classList.toggle('editing'); e.target.setAttribute('aria-pressed',String(on)); e.target.textContent=on?'Done':'Edit'; if(on) c.querySelector('input.latex').focus(); };
-      if(q.unsure) c.querySelector('#ed-'+k).textContent='Done';
-      c.querySelector('#st-'+k).onchange=e=>q.status=e.target.value;
-      c.querySelector('#pt-'+k).oninput=e=>q.points=e.target.value;
-      c.querySelector('#wb-'+k).oninput=e=>{ q.what_broke=e.target.value; c.querySelector('.wb-view').textContent=e.target.value||'Nothing to note.'; };
-      c.querySelector('#rm-'+k).onclick=()=>{ readResult.questions.splice(k,1); drawQuestions(); };
-      ['problem','answer','student_answer'].forEach(f=>{
-        const inp=c.querySelector(`#${f}-${k}`), pv=c.querySelector(`#pv-${f}-${k}`);
-        inp.oninput=()=>{ q[f]=inp.value; pv.innerHTML=tex(inp.value,false); if(f!=='student_answer') q.edited=true; };
-      });
-    });
-  }
-  function fieldHTML(k,f,label,val){
-    return `<div class="field"><label for="${f}-${k}">${label}</label><input class="latex" id="${f}-${k}" value="${esc(val)}" spellcheck="false"><div class="preview" id="pv-${f}-${k}">${tex(val,false)}</div></div>`;
-  }
+  function drawQuestions(){ reviewQuestions($id('qlist'), readResult.questions); }
 
   /* ---------- step 3: build ---------- */
   let jobs=[], buildCtl=null, plan=null;
@@ -676,6 +648,40 @@ function builder(){
 }
 
 
+
+/* ================= review what the AI read (shared by the Claude builder and the paste flow) ================= */
+let reviewSeq=0;
+function reviewQuestions(list, questions){
+  const id=(f,k)=>`r${reviewSeq}-${f}-${k}`;
+  reviewSeq++;
+  const draw=()=>{
+    list.innerHTML='';
+    questions.forEach((q,k)=>{
+      const c=document.createElement('div'); c.className='qcard'+(q.unsure?' unsure editing':'');
+      const opts=Object.keys(STATUS).map(s=>`<option value="${s}"${s===q.status?' selected':''}>${STATUS[s]}</option>`).join('');
+      const field=(f,label)=>`<div class="field"><label for="${id(f,k)}">${label}</label><input class="latex" id="${id(f,k)}" value="${esc(q[f])}" spellcheck="false"><div class="preview" id="${id('pv'+f,k)}">${tex(q[f],false)}</div></div>`;
+      c.innerHTML=`<div class="qhead"><strong>#${esc(q.n)}</strong>
+        <label style="position:absolute;left:-9999px" for="${id('st',k)}">Status of question ${esc(q.n)}</label><select id="${id('st',k)}">${opts}</select>
+        <label style="position:absolute;left:-9999px" for="${id('pt',k)}">Points for question ${esc(q.n)}</label><input id="${id('pt',k)}" value="${esc(q.points)}" placeholder="points">
+        <button class="ctl ghost edit-toggle" id="${id('ed',k)}" aria-pressed="${q.unsure?'true':'false'}">${q.unsure?'Done':'Edit'}</button><button class="ctl ghost rm" id="${id('rm',k)}">Remove</button></div>
+        ${q.unsure?`<p class="unsure-note">Not sure: ${esc(q.unsure_note||'part of this was hard to read.')}</p>`:''}
+        ${field('problem','Problem')}${field('answer','Correct answer')}${field('student_answer','Answer on the test')}
+        <div class="field"><label for="${id('wb',k)}">What happened</label><textarea id="${id('wb',k)}">${esc(q.what_broke)}</textarea><p class="wb-view">${esc(q.what_broke||'Nothing to note.')}</p></div>`;
+      list.appendChild(c);
+      const el=(f)=>c.querySelector('#'+id(f,k));
+      el('ed').onclick=e=>{ const on=c.classList.toggle('editing'); e.target.setAttribute('aria-pressed',String(on)); e.target.textContent=on?'Done':'Edit'; if(on) c.querySelector('input.latex').focus(); };
+      el('st').onchange=e=>q.status=e.target.value;
+      el('pt').oninput=e=>q.points=e.target.value;
+      el('wb').oninput=e=>{ q.what_broke=e.target.value; c.querySelector('.wb-view').textContent=e.target.value||'Nothing to note.'; };
+      el('rm').onclick=()=>{ questions.splice(k,1); draw(); };
+      ['problem','answer','student_answer'].forEach(f=>{
+        el(f).oninput=()=>{ q[f]=el(f).value; el('pv'+f).innerHTML=tex(el(f).value,false); if(f!=='student_answer') q.edited=true; };
+      });
+    });
+  };
+  draw();
+}
+
 /* ================= public landing: any AI, copy and paste ================= */
 function landing(){
   const app=$id('app'); app.hidden=true;
@@ -728,8 +734,33 @@ function landing(){
   $id('kit-build').onclick=()=>{
     const r=readKit($id('kit-input').value), err=$id('kit-error');
     if(r.error){ err.textContent=r.error; err.hidden=false; return; }
-    err.hidden=true; openKit(r.kit);
+    err.hidden=true; showReview(r.kit);
   };
+  function showReview(kit){
+    const qs=(kit.test_questions||[]).map(q=>Object.assign({},q,{status:STATUS[q.status]?q.status:'unknown',points:q.points==null?'':String(q.points),what_broke:q.what_broke||'',unsure:q.read_confidence==='unsure'}));
+    if(!qs.length){ openKit(kit); return; }
+    const hidden=[...root.querySelectorAll('.bpanel')]; hidden.forEach(p=>p.hidden=true);
+    const panel=document.createElement('div'); panel.className='bpanel'; panel.id='review';
+    panel.innerHTML=`<h2>Check what the AI read</h2>
+      <p class="muted">AI can misread handwriting or the teacher's marks. Fix anything wrong before your child studies from it. Questions with an orange edge are ones the AI wasn't sure about. Tap Edit on any question to change it.</p>
+      <p class="muted">Changing a problem or its answer here doesn't redo its walkthrough, so the review will mark that question for you to double-check.</p>
+      <div class="grid3">
+        <div class="field"><label for="r-title">Title</label><input id="r-title"></div>
+        <div class="field"><label for="r-course">Course</label><input id="r-course"></div>
+        <div class="field"><label for="r-score">Score</label><input id="r-score"></div>
+      </div>
+      <div class="qlist" id="r-list"></div>
+      <div class="row"><button class="ctl play" id="r-go">Looks right, build the review</button><button class="ctl" id="r-back">Back</button></div>`;
+    root.querySelector('header').after(panel);
+    ['title','course','score'].forEach(f=>{ const i=$id('r-'+f); i.value=kit[f]||''; i.oninput=()=>kit[f]=i.value; });
+    reviewQuestions($id('r-list'), qs);
+    $id('r-go').onclick=()=>{
+      kit.test_questions=qs.map(q=>{ const o=Object.assign({},q); if(o.edited) o.check=null; delete o.unsure; delete o.unsure_note; delete o.read_confidence; return o; });
+      openKit(kit);
+    };
+    $id('r-back').onclick=()=>{ panel.remove(); hidden.forEach(p=>p.hidden=false); };
+    panel.scrollIntoView({block:'start'});
+  }
   function openKit(kit){
     try{ localStorage.setItem(STORE_KEY, JSON.stringify(kit)); }catch(e){}
     root.remove(); app.hidden=false; render(kit,'site'); addSiteToolbar(kit); window.scrollTo(0,0);

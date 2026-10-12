@@ -94,6 +94,8 @@ async def main():
             check(f'landing: {name} gives a clear message', expect in msg, msg)
         unescaped = '```json\n' + part1.replace('\\\\', '\\') + '\n```\nSay continue for part 2.\ncontinue\n' + part2
         await pg.fill('#kit-input', unescaped); await pg.click('#kit-build'); await pg.wait_for_timeout(300)
+        check('landing: a pasted kit goes to the review screen first', await pg.is_visible('#review') and await pg.locator('#review .qcard').count() == 5)
+        await pg.click('#r-go'); await pg.wait_for_timeout(300)
         bs = await badges(pg)
         check('landing: two-part answer with unescaped LaTeX builds the full kit', len(bs) == 10 and all(x == '✓ checked' for x in bs), bs)
         check('landing: print and download buttons on the built kit', await pg.locator('.toolbar [data-p]').count() == 2 and await pg.locator('#dl-html').count() == 1)
@@ -104,6 +106,8 @@ async def main():
             await pg.evaluate("localStorage.clear()")
             await pg.goto(DOCS + '/index.html'); await pg.wait_for_timeout(200)
             await pg.fill('#kit-input', text); await pg.click('#kit-build'); await pg.wait_for_timeout(300)
+            if await pg.is_visible('#r-go'):
+                await pg.click('#r-go'); await pg.wait_for_timeout(300)
         # Copying a chat reply's rendered text (not its code block) adds a backslash and escapes '*'.
         md = json.dumps(KIT).replace('\\\\', '\\\\\\').replace('*', '\\*')
         await paste(md)
@@ -124,6 +128,25 @@ async def main():
         await pg.click('#test-panel .next')
         cap = await pg.text_content('#test-panel .caption'); lab = await pg.text_content('#test-panel .flabel')
         check('messy: LaTeX in captions and labels becomes readable text', cap == 'So (-4)⁻² = 1/16 · 2' and lab == 'Step 1 · odd power', [lab, cap])
+
+        # Review screen: fix a misread before building
+        rk = json.loads(json.dumps(KIT))
+        rk['test_questions'][4]['read_confidence'] = 'unsure'; rk['test_questions'][4]['unsure_note'] = 'the last line is smudged'
+        await pg.goto(DOCS + '/index.html'); await pg.evaluate("localStorage.clear()"); await pg.goto(DOCS + '/index.html'); await pg.wait_for_timeout(200)
+        await pg.fill('#kit-input', json.dumps(rk)); await pg.click('#kit-build'); await pg.wait_for_timeout(300)
+        check('review: unsure question is flagged and open for editing', await pg.locator('#review .qcard.unsure.editing').count() == 1)
+        cards = pg.locator('#review .qcard')
+        await cards.nth(3).locator('select').select_option('correct')            # AI marked #4 wrong; the teacher checked it
+        await cards.nth(2).locator('.edit-toggle').click()
+        await cards.nth(2).locator('input.latex').nth(1).fill('\\dfrac{7}{16}')  # change #3's answer
+        await pg.fill('#r-title', 'Unit 4 Quiz')
+        await pg.screenshot(path=os.path.join(OUT, 'review-phone.png'), full_page=True)
+        await pg.click('#r-go'); await pg.wait_for_timeout(300)
+        check('review: title change carries through', await pg.text_content('#title') == 'Unit 4 Quiz')
+        check('review: status change carries through', await pg.get_attribute('#test-chips .chip >> nth=3', 'data-s') == 'correct')
+        await pg.click('#test-chips .chip >> nth=2')
+        note = await pg.text_content('#test-panel .panel')
+        check('review: an edited answer is marked for a double-check, with no check tag', 'You changed this question' in note and await pg.locator('#test-panel .check').count() == 0)
         check('landing: no page errors', not errs, errs)
         await pg.close()
 
@@ -137,7 +160,7 @@ async def main():
         await pg.click('#read-btn'); await pg.wait_for_selector('#b-confirm:not([hidden])', timeout=8000)
         check('claude: confirm screen lists every question', await pg.locator('.qcard').count() == 5)
         check('claude: unsure question is flagged and open', await pg.locator('.qcard.unsure.editing').count() == 1)
-        await pg.click('#ed-1'); await pg.fill('#answer-1', '\\dfrac{1}{144}')
+        await pg.locator('#qlist .qcard').nth(1).locator('.edit-toggle').click(); await pg.locator('#qlist .qcard').nth(1).locator('input.latex').nth(1).fill('\\dfrac{1}{144}')
         await pg.click('#build-btn'); await pg.wait_for_selector('#app:not([hidden])', timeout=20000); await pg.wait_for_timeout(300)
         log = await pg.evaluate('window.__log')
         check('claude: photos sent with the read call', log[0]['images'] == 2)

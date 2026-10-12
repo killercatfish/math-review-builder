@@ -28,6 +28,8 @@ One JSON object drives a review kit. Every field is optional except that a kit n
 | `status` | `correct`, `partial`, `wrong`, `blank`, or `unknown` |
 | `points` | As graded, e.g. `"3/4"`, or empty |
 | `what_broke` | For partial or wrong: the exact move that broke, in plain words |
+| `read_confidence`, `unsure_note` | `clear` or `unsure`, and what couldn't be read. Unsure questions open for editing on the review screen. |
+| `edited` | Set by the review screen when a parent changed the problem or answer. The walkthrough is not regenerated, so the question is marked for a double-check and its machine check is dropped. |
 | `check` | Machine check (below), or `null` |
 | `steps` | Walkthrough frames (below) |
 
