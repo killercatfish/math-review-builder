@@ -11,6 +11,8 @@ It's free, and it works with the AI you already use: Claude, ChatGPT, Gemini, or
 
 **[Open the builder](https://killercatfish.github.io/math-review-builder/)** · **[See an example kit](https://killercatfish.github.io/math-review-builder/example.html)**
 
+The example is a real Algebra 1 exponents test (16 questions, score removed), so you can see exactly what a parent gets back.
+
 ## How a parent uses it
 
 1. Open the builder and copy the prompt.
@@ -38,7 +40,8 @@ One JSON file drives everything: the walkthroughs, the practice problems, the pr
 | `src/template.html` | Page layout, styles, and print styles |
 | `src/main.js` | Renderer, walkthrough player, answer checks, the photo builder for Claude, and the copy-and-paste landing page |
 | `prompt/parent-prompt.txt` | The prompt for any AI |
-| `examples/example-kit.json` | A fictional example kit |
+| `examples/chapter8-real-kit.json` | The example on the site: a real Algebra 1 exponents test, used with permission, score removed |
+| `examples/example-kit.json` | A small fictional kit used by the tests |
 | `scripts/build.py` | Inlines KaTeX, math.js, the prompt, and the script into single-file pages |
 | `docs/` | The built site, served by GitHub Pages |
 | `tests/run_tests.py` | End-to-end checks with Playwright |

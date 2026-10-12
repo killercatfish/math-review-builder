@@ -53,7 +53,7 @@ def main():
     if not os.path.isdir(NM):
         sys.exit('Run `npm install` first (KaTeX and math.js are inlined from node_modules).')
     os.makedirs(os.path.join(ROOT, 'docs'), exist_ok=True)
-    example = json.loads(read('examples', 'example-kit.json'))
+    example = json.loads(read('examples', 'chapter8-real-kit.json'))
     outputs = {
         'index.html': full_document(page(title='Math Test Review Builder')),
         'example.html': full_document(page(kit=example, title='Example Review Kit')),
